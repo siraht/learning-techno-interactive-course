@@ -2,20 +2,21 @@
   "name": "living-techno-course",
   "version": "0.1.0",
   "private": true,
+  "packageManager": "bun@1.3.14",
   "engines": {
     "node": ">=22.13.0"
   },
   "scripts": {
-    "install:ci": "bash scripts/install-ci.sh",
-    "generate:course": "node scripts/generate-course.mjs",
-    "predev": "npm run generate:course",
-    "prebuild": "npm run generate:course",
-    "prebuild:netlify": "npm run generate:course",
+    "install:ci": "bun install --frozen-lockfile",
+    "generate:course": "bun scripts/generate-course.mjs",
+    "predev": "bun run generate:course",
+    "prebuild": "bun run generate:course",
+    "prebuild:netlify": "bun run generate:course",
     "dev": "WRANGLER_LOG_PATH=.wrangler/wrangler.log vite",
     "build": "bash scripts/build-verified.sh",
     "build:netlify": "next build",
     "start": "WRANGLER_LOG_PATH=.wrangler/wrangler.log vinext start",
-    "test": "npm run build && npm run build:netlify && node --test tests/*.test.mjs",
+    "test": "bun run build && bun run build:netlify && bun test tests/*.test.mjs",
     "validate:artifact": "bash scripts/validate-artifact.sh",
     "lint": "bash scripts/sites-env.sh -- eslint . --ignore-pattern dist --ignore-pattern .next",
     "db:generate": "bash scripts/sites-env.sh -- drizzle-kit generate"
