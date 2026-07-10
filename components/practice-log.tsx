@@ -1,0 +1,26 @@
+"use client";
+
+import { useMemo, useRef, useState } from "react";
+import { calculateStreak, ProgressState, useProgress } from "./progress";
+import { Icon } from "./icon";
+
+const empty = { module:"", variable:"", changed:"", heard:"", next:"", minutes:45 };
+
+export function PracticeLog() {
+  const { state, addPracticeEntry, deletePracticeEntry, importState, reset } = useProgress();
+  const [form,setForm]=useState(empty);
+  const fileRef=useRef<HTMLInputElement>(null);
+  const totalMinutes=useMemo(()=>state.practiceEntries.reduce((sum,item)=>sum+item.minutes,0),[state.practiceEntries]);
+  const submit=(event:React.FormEvent)=>{event.preventDefault();if(!form.variable.trim()||!form.heard.trim())return;addPracticeEntry({...form,date:new Date().toISOString().slice(0,10)});setForm(empty);};
+  const exportProgress=()=>{const blob=new Blob([JSON.stringify(state,null,2)],{type:"application/json"});const url=URL.createObjectURL(blob);const link=document.createElement("a");link.href=url;link.download=`living-techno-progress-${new Date().toISOString().slice(0,10)}.json`;link.click();URL.revokeObjectURL(url);};
+  const readFile=(file?:File)=>{if(!file)return;const reader=new FileReader();reader.onload=()=>{try{importState(JSON.parse(String(reader.result)) as ProgressState);}catch{window.alert("That file is not a valid Living Techno progress export.");}};reader.readAsText(file);};
+
+  return <div className="practice-page page-pad">
+    <header className="page-heading"><div><p className="eyebrow"><span>CAUSAL MEMORY</span><b>LOG</b></p><h1>PRACTICE<br/>WITH EVIDENCE</h1><p>The log is not a diary. Record the variable, the intervention, what you actually heard, and the next unresolved question.</p></div><div className="practice-stats"><span><strong>{state.practiceEntries.length}</strong>SESSIONS</span><span><strong>{Math.floor(totalMinutes/60)}h {totalMinutes%60}m</strong>LOGGED</span><span><strong>{calculateStreak(state.activeDays)}</strong>DAY STREAK</span></div></header>
+    <div className="practice-layout">
+      <form className="practice-form ruled-card" onSubmit={submit}><header><span>NEW SESSION</span><b>01</b></header><div className="form-grid"><label>MODULE / LESSON<input value={form.module} onChange={e=>setForm({...form,module:e.target.value})} placeholder="Week 3 — Groove Pool"/></label><label>MINUTES<input type="number" min="1" max="480" value={form.minutes} onChange={e=>setForm({...form,minutes:Number(e.target.value)})}/></label><label className="wide">VARIABLE TESTED *<input required value={form.variable} onChange={e=>setForm({...form,variable:e.target.value})} placeholder="How hat decay changes the pickup before beat 3"/></label><label className="wide">WHAT I CHANGED<textarea value={form.changed} onChange={e=>setForm({...form,changed:e.target.value})} placeholder="Shortened the open hat while preserving onset and level…"/></label><label className="wide">WHAT I HEARD *<textarea required value={form.heard} onChange={e=>setForm({...form,heard:e.target.value})} placeholder="The ghost note became legible and the bar turned over more clearly…"/></label><label className="wide">NEXT UNRESOLVED QUESTION<textarea value={form.next} onChange={e=>setForm({...form,next:e.target.value})} placeholder="Would the same result survive a different sample?"/></label></div><button className="primary-cta" type="submit"><Icon name="arrow"/><span>SAVE SESSION</span></button></form>
+      <aside className="data-panel ruled-card"><header><span>YOUR DATA</span><b>02</b></header><p>Progress stays in this browser. Export it periodically if you use multiple computers or clear browser storage.</p><button onClick={exportProgress}><Icon name="download"/>EXPORT PROGRESS</button><button onClick={()=>fileRef.current?.click()}><Icon name="arrow"/>IMPORT PROGRESS</button><input hidden ref={fileRef} type="file" accept="application/json" onChange={e=>readFile(e.target.files?.[0])}/><button className="danger" onClick={()=>{if(window.confirm("Reset all course progress, notes, and practice entries on this device?"))reset();}}>RESET LOCAL DATA</button></aside>
+    </div>
+    <section className="session-history"><div className="section-title"><span>SESSION HISTORY</span><b>{state.practiceEntries.length} RECORDS</b></div>{state.practiceEntries.length?<div>{state.practiceEntries.map((entry,index)=><article key={entry.id}><header><b>{String(state.practiceEntries.length-index).padStart(3,"0")}</b><span>{entry.date} · {entry.minutes} MIN</span><button onClick={()=>deletePracticeEntry(entry.id)}>DELETE</button></header><h2>{entry.variable}</h2>{entry.module&&<p className="module-tag">{entry.module}</p>}<dl><div><dt>CHANGED</dt><dd>{entry.changed||"—"}</dd></div><div><dt>HEARD</dt><dd>{entry.heard}</dd></div><div><dt>NEXT</dt><dd>{entry.next||"—"}</dd></div></dl></article>)}</div>:<div className="empty-state">No sessions logged yet. Your first entry should isolate one variable and record one audible result.</div>}</section>
+  </div>;
+}
