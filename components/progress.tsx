@@ -11,26 +11,31 @@ export interface PracticeEntry {
   changed: string;
   heard: string;
   next: string;
+  skills:string[];
 }
 
 export interface ProgressState {
   completed: string[];
   bookmarked: string[];
+  visited: string[];
   lastVisited: string | null;
   notes: Record<string, string>;
   exercises: Record<string, string[]>;
   practiceEntries: PracticeEntry[];
   activeDays: string[];
+  skillEvidence: Record<string,{rating:number;note:string;updatedAt:string}>;
 }
 
 const defaultState: ProgressState = {
   completed: [],
   bookmarked: [],
+  visited: [],
   lastVisited: null,
   notes: {},
   exercises: {},
   practiceEntries: [],
   activeDays: [],
+  skillEvidence: {},
 };
 
 interface ProgressContextValue {
@@ -41,6 +46,7 @@ interface ProgressContextValue {
   visitLesson: (id: string) => void;
   saveNote: (id: string, note: string) => void;
   toggleExercise: (lessonId: string, exercise: string) => void;
+  setSkillEvidence: (skillId:string,rating:number,note:string) => void;
   addPracticeEntry: (entry: Omit<PracticeEntry, "id">) => void;
   deletePracticeEntry: (id: string) => void;
   importState: (state: ProgressState) => void;
@@ -58,11 +64,13 @@ function normalize(value: Partial<ProgressState>): ProgressState {
   return {
     completed: Array.isArray(value.completed) ? value.completed : [],
     bookmarked: Array.isArray(value.bookmarked) ? value.bookmarked : [],
+    visited: Array.isArray(value.visited) ? value.visited : [],
     lastVisited: typeof value.lastVisited === "string" ? value.lastVisited : null,
     notes: value.notes && typeof value.notes === "object" ? value.notes : {},
     exercises: value.exercises && typeof value.exercises === "object" ? value.exercises : {},
-    practiceEntries: Array.isArray(value.practiceEntries) ? value.practiceEntries : [],
+    practiceEntries: Array.isArray(value.practiceEntries) ? value.practiceEntries.map(entry=>({...entry,skills:Array.isArray(entry.skills)?entry.skills:[]})) : [],
     activeDays: Array.isArray(value.activeDays) ? value.activeDays : [],
+    skillEvidence: value.skillEvidence && typeof value.skillEvidence === "object" ? value.skillEvidence : {},
   };
 }
 
@@ -115,7 +123,7 @@ export function ProgressProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const visitLesson = useCallback((id: string) => {
-    setState((current) => ({ ...current, lastVisited: id, activeDays: updateActivity(current) }));
+    setState((current) => ({ ...current, lastVisited: id, visited:current.visited.includes(id)?current.visited:[...current.visited,id], activeDays: updateActivity(current) }));
   }, [updateActivity]);
 
   const saveNote = useCallback((id: string, note: string) => {
@@ -144,6 +152,10 @@ export function ProgressProvider({ children }: { children: React.ReactNode }) {
     }));
   }, [updateActivity]);
 
+  const setSkillEvidence=useCallback((skillId:string,rating:number,note:string)=>{
+    setState(current=>({...current,skillEvidence:{...current.skillEvidence,[skillId]:{rating:Math.max(0,Math.min(4,rating)),note,updatedAt:new Date().toISOString()}}}));
+  },[]);
+
   const deletePracticeEntry = useCallback((id: string) => {
     setState((current) => ({
       ...current,
@@ -162,11 +174,12 @@ export function ProgressProvider({ children }: { children: React.ReactNode }) {
     visitLesson,
     saveNote,
     toggleExercise,
+    setSkillEvidence,
     addPracticeEntry,
     deletePracticeEntry,
     importState,
     reset,
-  }), [state, hydrated, toggleComplete, toggleBookmark, visitLesson, saveNote, toggleExercise, addPracticeEntry, deletePracticeEntry, importState, reset]);
+  }), [state, hydrated, toggleComplete, toggleBookmark, visitLesson, saveNote, toggleExercise, setSkillEvidence, addPracticeEntry, deletePracticeEntry, importState, reset]);
 
   return <ProgressContext.Provider value={value}>{children}</ProgressContext.Provider>;
 }

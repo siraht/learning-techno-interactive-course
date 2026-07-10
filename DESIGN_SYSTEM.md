@@ -44,3 +44,9 @@ This makes every visual responsive, accessible, stylistically consistent, and di
 - 3px signal focus indicator with a 2px canvas offset
 - reduced-motion mode removes transforms and interpolation
 - state is never communicated by color alone
+- a skip link reaches the main course content
+- page navigation exposes `aria-current`; toggles expose pressed/expanded state
+- progress meters expose names, minimums, maximums, and current values
+- long tables are keyboard-focusable scrolling regions
+- external links are visually identified and retain safe `rel` attributes
+- lesson source headings are normalized so every page descends from one `h1` without skipping levels

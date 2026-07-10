@@ -5,7 +5,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Icon } from "./icon";
 import { useProgress } from "./progress";
 
-interface LessonItem { id: string; slug: string; sequence: number; title: string; kind: string; minutes: number; description: string; concepts: string[]; }
+interface LessonItem { id: string; slug: string; sequence: number; title: string; kind: string; minutes: number; description: string; concepts: string[]; skills:{id:string;name:string}[]; }
 interface PartItem { title: string; slug: string; minutes: number; lessons: LessonItem[]; }
 
 export function CourseMap({ parts }: { parts: PartItem[] }) {
@@ -24,7 +24,7 @@ export function CourseMap({ parts }: { parts: PartItem[] }) {
     <div className="parts-stack">
       {visible.map((part) => { const done = part.lessons.filter((lesson)=>completed.has(lesson.id)).length; return <section className="part-block" id={part.slug} key={part.slug}>
         <header><div><b>{String(parts.findIndex((item)=>item.slug===part.slug)+1).padStart(2,"0")}</b><h2>{part.title}</h2></div><span>{done}/{part.lessons.length} COMPLETE · {Math.floor(part.minutes/60)}H {part.minutes%60}M</span></header>
-        <div className="lesson-list">{part.lessons.map((lesson)=><Link key={lesson.id} href={`/course/${lesson.slug}/`} className={`lesson-row ${completed.has(lesson.id)?"complete":""}`}><i>{completed.has(lesson.id)?<Icon name="check"/>:String(lesson.sequence).padStart(3,"0")}</i><span><strong>{lesson.title}</strong><small>{lesson.description}</small><em>{lesson.concepts.map((concept)=><b key={concept}>{concept}</b>)}</em></span><dl><div><dt>TYPE</dt><dd>{lesson.kind}</dd></div><div><dt>TIME</dt><dd>{lesson.minutes} min</dd></div></dl><Icon name="arrow"/></Link>)}</div>
+        <div className="lesson-list">{part.lessons.map((lesson)=><article key={lesson.id} className={`lesson-row ${completed.has(lesson.id)?"complete":""}`}><i>{completed.has(lesson.id)?<Icon name="check"/>:String(lesson.sequence).padStart(3,"0")}</i><span><Link className="lesson-title-link" href={`/course/${lesson.slug}/`}>{lesson.title}</Link><small>{lesson.description}</small><em>{lesson.skills.slice(0,3).map((skill)=><Link href={`/skills/#skill-${skill.id}`} key={skill.id}>{skill.name}</Link>)}</em></span><dl><div><dt>TYPE</dt><dd>{lesson.kind}</dd></div><div><dt>TIME</dt><dd>{lesson.minutes} min</dd></div></dl><Link className="row-arrow" aria-label={`Open ${lesson.title}`} href={`/course/${lesson.slug}/`}><Icon name="arrow"/></Link></article>)}</div>
       </section>})}
       {!visible.length && <div className="empty-state">No lessons match this filter. Remove a category or shorten the search phrase.</div>}
     </div>

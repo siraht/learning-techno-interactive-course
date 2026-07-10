@@ -4,6 +4,7 @@ export function Icon({ name, size = 20 }: { name: string; size?: number }) {
     map: <><path d="m3 6 5-3 8 3 5-3v15l-5 3-8-3-5 3Z"/><path d="M8 3v15M16 6v15"/></>,
     lesson: <><rect x="3" y="4" width="18" height="16" rx="1"/><path d="m10 9 5 3-5 3Z"/></>,
     practice: <path d="M2 13h4l2-8 4 14 3-10 2 4h5"/>,
+    skills: <><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/><circle cx="4" cy="8" r="2"/><circle cx="10" cy="2" r="2"/><circle cx="16" cy="11" r="2"/></>,
     reference: <><path d="M4 4h6v16H4zM14 4h6v16h-6z"/><path d="M7 8h0M17 8h0"/></>,
     glossary: <><rect x="3" y="3" width="18" height="18" rx="1"/><path d="M7 8h10M7 12h7M7 16h9"/></>,
     system: <><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1-2.8 2.8-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.6v.2h-4V21a1.7 1.7 0 0 0-1-1.6 1.7 1.7 0 0 0-1.9.3l-.1.1L4.2 17l.1-.1a1.7 1.7 0 0 0 .3-1.9A1.7 1.7 0 0 0 3 14H2.8v-4H3a1.7 1.7 0 0 0 1.6-1 1.7 1.7 0 0 0-.3-1.9L4.2 7 7 4.2l.1.1A1.7 1.7 0 0 0 9 4.6a1.7 1.7 0 0 0 1-1.6v-.2h4V3a1.7 1.7 0 0 0 1 1.6 1.7 1.7 0 0 0 1.9-.3l.1-.1L19.8 7l-.1.1a1.7 1.7 0 0 0-.3 1.9 1.7 1.7 0 0 0 1.6 1h.2v4H21a1.7 1.7 0 0 0-1.6 1Z"/></>,

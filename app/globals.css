@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@import "./skills.css";
 
 :root{
   --canvas:#0a0b09;--canvas-2:#0d0f0c;--surface:#131512;--surface-raised:#1a1d18;--surface-hover:#20231d;

@@ -4,16 +4,18 @@ A complete static course application generated from `content/living-techno-curri
 
 ## What is included
 
-- 103 statically generated lesson pages containing the complete curriculum
+- 112 statically generated lesson pages containing every second-level lesson plus previously easy-to-drop first-level overview and appendix material
 - dashboard with completion, time-left, streak, bookmarks, and current-lesson state
+- five-domain skills dashboard with lesson coverage, exercise practice, tagged sessions, prerequisites, and self-evidence
 - searchable/filterable course map
 - local lesson completion, exercise checks, notes, and practice sessions
 - JSON progress export/import
 - searchable glossary and artist/reference library
+- contextual glossary links, lesson-to-skill links, skill-to-lesson links, prerequisites, and related-lesson paths
 - responsive educational diagrams for meter, rhythm, envelopes, machines, signal flow, modulation, spectrum, and arrangement energy
 - dark Club Manual design system documented at `/design-system/`
 
-All learner state stays in browser `localStorage`; the course has no database, authentication, analytics, or server requirement.
+All learner state stays in browser `localStorage`; the course has no database, authentication, analytics, or server requirement. See `SKILL_MODEL.md` for why section completion and capability progress are tracked separately.
 
 ## Local development
 
@@ -46,4 +48,4 @@ Every second-level Markdown heading (`##`) becomes a lesson. First-level heading
 
 ## Validation
 
-`npm test` checks both the Sites/Vinext build and the Netlify static export, confirms all 103 lessons exist, and verifies every internal HTML link resolves.
+`npm test` checks both the Sites/Vinext build and the Netlify static export, confirms all 112 lessons exist, verifies the skills map and accessibility landmarks, and checks that every internal HTML link resolves.

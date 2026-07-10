@@ -6,11 +6,13 @@ import { Icon } from "./icon";
 import { calculateStreak, useProgress } from "./progress";
 import { CourseDiagram } from "./diagram";
 import type { DiagramKind } from "../lib/course";
+import { calculateSkillProgressById } from "../lib/skill-progress";
 
 interface LessonSummary { id: string; slug: string; sequence: number; title: string; part: string; minutes: number; kind: string; description: string; diagram: DiagramKind; }
 interface PartSummary { title: string; slug: string; lessonIds: string[]; minutes: number; }
+interface SkillSummary {id:string;name:string;domain:string;lessonIds:string[];}
 
-export function Dashboard({ lessons, parts, totalMinutes }: { lessons: LessonSummary[]; parts: PartSummary[]; totalMinutes: number }) {
+export function Dashboard({ lessons, parts, totalMinutes, skills }: { lessons: LessonSummary[]; parts: PartSummary[]; totalMinutes: number;skills:SkillSummary[] }) {
   const { state, toggleComplete } = useProgress();
   const completed = useMemo(() => new Set(state.completed), [state.completed]);
   const next = lessons.find((lesson) => !completed.has(lesson.id)) || lessons[lessons.length - 1];
@@ -23,6 +25,9 @@ export function Dashboard({ lessons, parts, totalMinutes }: { lessons: LessonSum
   const weekly = lessons.filter((lesson) => !completed.has(lesson.id)).slice(0, 5);
   const activePart = parts.find((part) => part.lessonIds.includes(current.id)) || parts[0];
   const partProgress = useMemo(() => parts.map((part) => ({ ...part, done: part.lessonIds.filter((id) => completed.has(id)).length })), [parts, completed]);
+  const skillProgress=useMemo(()=>skills.map(skill=>({...skill,progress:calculateSkillProgressById(skill.id,skill.lessonIds,state)})),[skills,state]);
+  const domainProgress=useMemo(()=>Array.from(new Set(skills.map(skill=>skill.domain))).map(domain=>{const values=skillProgress.filter(skill=>skill.domain===domain);return{domain,score:Math.round(values.reduce((sum,item)=>sum+item.progress.score,0)/Math.max(1,values.length))};}),[skills,skillProgress]);
+  const nextSkill=[...skillProgress].filter(item=>item.progress.score<100).sort((a,b)=>a.progress.score-b.progress.score)[0];
 
   return <div className="dashboard-page page-pad">
     <section className="dashboard-hero">
@@ -47,6 +52,8 @@ export function Dashboard({ lessons, parts, totalMinutes }: { lessons: LessonSum
       <article className="ruled-card metrics-card"><header><span>COURSE SIGNAL</span><b>05</b></header><dl><div><dt>LESSONS</dt><dd>{state.completed.length}<span>/{lessons.length}</span></dd></div><div><dt>TIME LEFT</dt><dd>{Math.floor(remaining/60)}h <span>{remaining%60}m</span></dd></div><div><dt>NOTES</dt><dd>{Object.values(state.notes).filter(Boolean).length}</dd></div><div><dt>SAVED</dt><dd>{state.bookmarked.length}</dd></div></dl><footer>LOCAL · PRIVATE · EXPORTABLE</footer></article>
     </section>
 
-    <section className="part-signal ruled-card"><header><span>COURSE MAP</span><b>06</b></header><div className="part-strip">{partProgress.map((part, index)=><Link key={part.slug} href={`/course/#${part.slug}`} className={part.done===part.lessonIds.length?"complete":part.lessonIds.includes(current.id)?"current":""}><i>{String(index+1).padStart(2,"0")}</i><span>{part.title.replace(/^Part [^—]+—\s*/,"")}</span><em>{part.done}/{part.lessonIds.length}</em></Link>)}</div></section>
+    <section className="dashboard-skill-signal ruled-card"><header><span>SKILL SIGNAL</span><b>06</b></header><div className="domain-bars">{domainProgress.map(item=><div key={item.domain}><span>{item.domain}</span><i role="progressbar" aria-label={`${item.domain} skill progress`} aria-valuemin={0} aria-valuemax={100} aria-valuenow={item.score}><em style={{width:`${item.score}%`}}/></i><strong>{item.score}%</strong></div>)}</div>{nextSkill&&<Link className="next-skill" href={`/skills/#skill-${nextSkill.id}`}><small>NEXT LOWEST SIGNAL</small><strong>{nextSkill.name}</strong><span>{nextSkill.progress.stage} · {nextSkill.progress.score}% worked</span><Icon name="arrow"/></Link>}<footer><Link href="/skills/">OPEN THE COMPLETE SKILLS MAP <Icon name="arrow"/></Link></footer></section>
+
+    <section className="part-signal ruled-card"><header><span>COURSE MAP</span><b>07</b></header><div className="part-strip">{partProgress.map((part, index)=><Link key={part.slug} href={`/course/#${part.slug}`} className={part.done===part.lessonIds.length?"complete":part.lessonIds.includes(current.id)?"current":""}><i>{String(index+1).padStart(2,"0")}</i><span>{part.title.replace(/^Part [^—]+—\s*/,"")}</span><em>{part.done}/{part.lessonIds.length}</em></Link>)}</div></section>
   </div>;
 }

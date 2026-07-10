@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { LessonPage } from "../../../components/lesson-page";
 import { getAdjacentLesson, getLesson, getRelatedLessons, lessons } from "../../../lib/course";
+import { getSkillsForLesson,skillById } from "../../../lib/skills";
 
 export function generateStaticParams() { return lessons.map((lesson)=>({slug:lesson.slug})); }
 
@@ -18,6 +19,7 @@ export default async function LessonRoute({ params }: { params: Promise<{slug:st
   const previous = getAdjacentLesson(slug,-1);
   const next = getAdjacentLesson(slug,1);
   const related = getRelatedLessons(lesson);
+  const mappedSkills=getSkillsForLesson(lesson).map(skill=>({...skill,prerequisites:skill.prerequisites.map(id=>skillById(id)).filter(Boolean).map(item=>({id:item!.id,name:item!.name}))}));
   const summary = (item: typeof lesson) => ({slug:item.slug,title:item.title,sequence:item.sequence,part:item.part,minutes:item.minutes});
-  return <LessonPage lesson={{id:lesson.id,slug:lesson.slug,sequence:lesson.sequence,title:lesson.title,part:lesson.part,kind:lesson.kind,description:lesson.description,html:lesson.html,minutes:lesson.minutes,wordCount:lesson.wordCount,diagram:lesson.diagram,concepts:lesson.concepts,headings:lesson.headings}} previous={previous?summary(previous):undefined} next={next?summary(next):undefined} related={related.map(summary)}/>;
+  return <LessonPage lesson={{id:lesson.id,slug:lesson.slug,sequence:lesson.sequence,title:lesson.title,part:lesson.part,kind:lesson.kind,description:lesson.description,html:lesson.html,minutes:lesson.minutes,wordCount:lesson.wordCount,diagram:lesson.diagram,concepts:lesson.concepts,headings:lesson.headings}} previous={previous?summary(previous):undefined} next={next?summary(next):undefined} related={related.map(summary)} skills={mappedSkills}/>;
 }
